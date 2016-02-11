@@ -1,6 +1,7 @@
 var winston = require('winston');
 var config = require('../config');
 var Slack = require('slack-client');
+var clashApi = require('clash-of-clans-api');
 var model = require('./model');
 var _ = require('underscore');
 var Parser = require('./parser').Parser;
@@ -198,14 +199,49 @@ function connect(app) {
   var autoReconnect = true; // Automatically reconnect after an error response from Slack.
   var autoMark = true; // Automatically mark each message as read after it is processed.
   var slack = new Slack(token, autoReconnect, autoMark);
+  var coc = clashApi({
+    token: config.coc.token
+  });
 
   var clashbotParser = new Parser({
     activates: 'clashbot',
     verbs: [
       {
-        words: ['hello'],
+        words: ['hello', 'hey', 'hi'],
         handler: function (req, res) {
-          res.send('Hi <@' + res.user + '>');
+          res.send('Hi <@' + req.user + '>');
+        }
+      },
+      // {
+      //   words: ['rank'],
+      //   handler: function (req, res) {
+      //     coc
+      //       .clanMembersByTag('#UPC2UQ')
+      //       .then(function (response) {
+      //         var members = _(response.items)
+      //           .sortBy('clanRank')
+      //           //.forEach
+      //       });
+      //   }
+      // }
+      {
+        words: ['info', 'get info'],
+        handler: function (req, res) {
+          var name = req.words.rest();
+          coc
+            .clanMembersByTag('#UPC2UQ')
+            .then(function (response) {
+              var members = _.filter(response.items, function (member) {
+                return member.name.toLowerCase() === name.toLowerCase();
+              });
+              var member = members[0];
+              if (member) {
+                res.send(name + ' has ' + member.trophies + ' trophies and ' + member.donations + ' donations');
+              }
+            })
+            .catch(function (err) {
+              console.log(err);
+            });
         }
       }
     ]
@@ -219,12 +255,13 @@ function connect(app) {
   slack.on('message', function onSlackMessage(message) {
     //forSlack(slack).forCommands(commands).execute(message);
     clashbotParser.parse({
-       message: message
+      message: message.text,
+      user: message.user
     },
     {
-      send: function (message) {
+      send: function (response) {
         var channel = slack.getChannelGroupOrDMByID(message.channel);
-        channel.send(message);
+        channel.send(response);
       }
     });
   });

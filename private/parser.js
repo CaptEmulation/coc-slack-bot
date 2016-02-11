@@ -22,6 +22,9 @@ _.extend(WordList.prototype, {
   words: function () {
     return this._words;
   },
+  rest: function () {
+    return this._words.join(' ');
+  },
   contains: function (word) {
     return this._words.indexOf(word) != -1;
   },
@@ -93,16 +96,23 @@ _.extend(Parser.prototype, {
         return selfie._definition.ignored.indexOf(word) !== -1;
       },
       handle: function (req, res) {
-        dsl.delegate().handler(req, res);
+        dsl.delegate(function (numberOfWords) {
+          for (var i = 0; i < numberOfWords; i++) {
+            words.pullFirst();
+          }
+        }).handler(req, res);
         return dsl;
       },
-      delegate: function () {
+      delegate: function (callback) {
         return _.find(selfie._definition.verbs, function (verb) {
           var found = false;
           for (var length = verb.words.length, i = 0; i < length; i++) {
             var verbWord = verb.words[i];
             found = words.startsWith(verbWord);
-            if (found) break;
+            if (found) {
+              callback && callback(i + 1);
+              break;
+            }
           }
           return found;
         });
