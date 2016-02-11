@@ -116,6 +116,9 @@ _.extend(Parser.prototype, {
       take: function () {
         word = words.pullFirst();
         return dsl;
+      },
+      first: function () {
+        return words.first();
       }
     };
     return dsl;
