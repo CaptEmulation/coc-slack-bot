@@ -1,0 +1,38 @@
+{
+  "name": "coc-war-stats",
+  "version": "0.0.1",
+  "authors": [
+    "John Dean <john.holmes.dean@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "requirejs": "~2.1.15",
+    "jquery": "~2.1.4",
+    "almond": "~0.3.0",
+    "sprintf": "~1.0.2",
+    "selectn": "~0.9.6",
+    "underscore": "~1.8.3",
+    "es5-shim": "~4.1.0",
+    "simple-uuid": "~1.0.1",
+    "react": "~0.13.1",
+    "bootstrap": "~3.3.4",
+    "marionette": "~2.4.1",
+    "backbone": "~1.1.2",
+    "bootstrap-js-dropdown": "~2.2.1",
+    "marionette-formview": "~1.1.0",
+    "bootstrap3-datetimepicker": "~4.7.14",
+    "moment": "~2.10.2"
+  },
+  "devDependencies": {
+    "sinon": "~1.14.1",
+    "chai": "~2.2.0",
+    "mocha": "~2.2.1"
+  }
+}
