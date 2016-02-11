@@ -212,18 +212,23 @@ function connect(app) {
           res.send('Hi <@' + req.user + '>');
         }
       },
-      // {
-      //   words: ['rank'],
-      //   handler: function (req, res) {
-      //     coc
-      //       .clanMembersByTag('#UPC2UQ')
-      //       .then(function (response) {
-      //         var members = _(response.items)
-      //           .sortBy('clanRank')
-      //           //.forEach
-      //       });
-      //   }
-      // }
+      {
+        words: ['rank'],
+        handler: function (req, res) {
+          coc
+            .clanMembersByTag('#UPC2UQ')
+            .then(function (response) {
+              var response = _.chain(response.items)
+                .sortBy('clanRank')
+                .map(function (member) {
+                  return member.name + ' has ' + member.trophies + ' trophies and ' + member.donations + ' donations'
+                })
+                .join('\n')
+                .value();
+              res.send(response);
+            });
+        }
+      },
       {
         words: ['info', 'get info'],
         handler: function (req, res) {
