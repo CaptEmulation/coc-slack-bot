@@ -73,7 +73,7 @@ _.extend(Parser.prototype, {
     req.words = req.words || new WordList(req.message);
     var dsl = this.for(req.words);
     var activate = this.activatesOn();
-    if (activate && activate === dsl.first()) {
+    if (activate && dsl.first() && activate.toLowerCase() === dsl.first().toLowerCase()) {
       dsl.take();
     } else if (activate && activate !== dsl.first()) {
       return;

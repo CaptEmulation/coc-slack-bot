@@ -1,10 +1,9 @@
 var winston = require('winston');
 var config = require('../config');
 var Slack = require('slack-client');
-var clashApi = require('clash-of-clans-api');
 var model = require('./model');
 var _ = require('underscore');
-var Parser = require('./parser').Parser;
+var clashbot = require('./clashbot');
 var Player = model.Player;
 var WarEvent = model.WarEvent;
 
@@ -199,59 +198,6 @@ function connect(app) {
   var autoReconnect = true; // Automatically reconnect after an error response from Slack.
   var autoMark = true; // Automatically mark each message as read after it is processed.
   var slack = new Slack(token, autoReconnect, autoMark);
-  var coc = clashApi({
-    token: config.coc.token
-  });
-
-  var clashbotParser = new Parser({
-    activates: 'clashbot',
-    verbs: [
-      {
-        words: ['hello', 'hey', 'hi'],
-        handler: function (req, res) {
-          res.send('Hi <@' + req.user + '>');
-        }
-      },
-      {
-        words: ['rank'],
-        handler: function (req, res) {
-          coc
-            .clanMembersByTag('#UPC2UQ')
-            .then(function (response) {
-              var response = _.chain(response.items)
-                .sortBy('clanRank')
-                .map(function (member) {
-                  return member.name + ' has ' + member.trophies + ' trophies and ' + member.donations + ' donations'
-                })
-                .join('\n')
-                .value();
-              res.send(response);
-            });
-        }
-      },
-      {
-        words: ['info', 'get info'],
-        handler: function (req, res) {
-          var name = req.words.rest();
-          coc
-            .clanMembersByTag('#UPC2UQ')
-            .then(function (response) {
-              var members = _.filter(response.items, function (member) {
-                return member.name.toLowerCase() === name.toLowerCase();
-              });
-              var member = members[0];
-              if (member) {
-                res.send(name + ' has ' + member.trophies + ' trophies and ' + member.donations + ' donations');
-              }
-            })
-            .catch(function (err) {
-              console.log(err);
-            });
-        }
-      }
-    ]
-  });
-
 
   slack.on('open', function slackopen() {
     logger.debug('Connected to ' + slack.team.name + ' as @' + slack.self.name);
@@ -259,7 +205,7 @@ function connect(app) {
 
   slack.on('message', function onSlackMessage(message) {
     //forSlack(slack).forCommands(commands).execute(message);
-    clashbotParser.parse({
+    clashbot.parse({
       message: message.text,
       user: message.user
     },
