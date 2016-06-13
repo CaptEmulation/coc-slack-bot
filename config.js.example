@@ -8,5 +8,8 @@ module.exports = {
   },
   coc: {
     token: 'verylongstring'
+  },
+  clan: {
+    tag: '#UCLN74G'
   }
 }

@@ -7,6 +7,7 @@ var coc = clashApi({
   token: config.coc.token
 });
 
+var clanTag = config.clan.tag;
 
 var verbs = [
   {
@@ -29,7 +30,7 @@ var verbs = [
     words: ['rank'],
     handler: function (req, res) {
       coc
-        .clanMembersByTag('#UPC2UQ')
+        .clanMembersByTag(clanTag)
         .then(function (response) {
           var response = _.chain(response.items)
             .sortBy('clanRank')
@@ -48,7 +49,7 @@ var verbs = [
     handler: function (req, res) {
       var name = req.words.rest();
       coc
-        .clanMembersByTag('#UPC2UQ')
+        .clanMembersByTag(clanTag)
         .then(function (response) {
           var members = _.filter(response.items, function (member) {
             return member.name.toLowerCase() === name.toLowerCase();
