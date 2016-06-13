@@ -1,6 +1,7 @@
 var clashApi = require('clash-of-clans-api');
 var config = require('../config');
 var Parser = require('./parser').Parser;
+var _ = require('underscore');
 
 var coc = clashApi({
   token: config.coc.token

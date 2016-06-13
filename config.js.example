@@ -1,0 +1,12 @@
+module.exports = {
+  mongodb: {
+    uri: 'mongodb://localhost/database'
+  },
+  slack: {
+    url: 'myslackteam.slack.com',
+    token: 'xoxoa-my-slack-token'
+  },
+  coc: {
+    token: 'verylongstring'
+  }
+}
