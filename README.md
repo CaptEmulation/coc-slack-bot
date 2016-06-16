@@ -1,6 +1,6 @@
 # WARNING
 
-This code is highly experimental, and is under development.  Use with cation.
+This code is highly experimental, and is under development.  Use with caution.
 
 # Setup
 
