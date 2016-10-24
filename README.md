@@ -1,6 +1,6 @@
 # WARNING
 
-This code is highly experimental, and is only here so that I could release it and pull from npm.  This is a mash-up of several ideas and much is left unfinished and under development.  Use with cation.
+This code is highly experimental, and is under development.  Use with caution.
 
 # Setup
 
@@ -14,23 +14,18 @@ This code is highly experimental, and is only here so that I could release it an
 ### Services
 
  - Static IP
- - Clash of Clands developer API token
- - Slack bot integration token
+ - [Clash of Clans developer API token](developer.clashofclans.com)
+ - [Slack bot integration token](api.slack.com/tokens)
 
 ## Configuration
-
-```
-cp config.js.example config.js
-```
-
-Modify `config.js` for your system.
 
 # Intall
 
 1. Clone this repo.
-1. `npm i`
+1. `npm install`
 1. `cp config.js.example config.js`
 1. Modify `config.js` for your system.
+1. `npm update`
 
 # Execution
 
