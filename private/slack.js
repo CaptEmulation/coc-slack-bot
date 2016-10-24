@@ -1,5 +1,5 @@
 var winston = require('winston');
-var config = require('../config');
+var config = require('config');
 var Slack = require('slack-client');
 var model = require('./model');
 var _ = require('underscore');

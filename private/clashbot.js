@@ -1,5 +1,5 @@
 var clashApi = require('clash-of-clans-api');
-var config = require('../config');
+var config = require('config');
 var Parser = require('./parser').Parser;
 var _ = require('underscore');
 

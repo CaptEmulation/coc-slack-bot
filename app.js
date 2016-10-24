@@ -3,9 +3,9 @@
  */
 
 var express = require('express');
-var app = express(); 
+var app = express();
 var server = require('http').Server(app);
-var config = require('./config');
+var config = require('config');
 var winston = require('winston');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
