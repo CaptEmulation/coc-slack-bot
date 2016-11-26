@@ -9,7 +9,7 @@ module.exports = {
   coc: {
       token: 'COC_TOKEN'
   },
-  clan: {
-    tag: 'CLAN_TAG'
+  clanTags: {
+    default: 'CLAN_TAG'
   }
 };

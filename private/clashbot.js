@@ -2,12 +2,19 @@ var clashApi = require('clash-of-clans-api');
 var config = require('config');
 var Parser = require('./parser').Parser;
 var _ = require('underscore');
+var Promise = require('bluebird');
+var fuzzy = require('fuzzy');
+var debug = require('debug')('clashbot');
 
 var coc = clashApi({
   token: config.coc.token
 });
 
-var clanTag = config.clan.tag;
+var clanTags = config.clanTags;
+
+function getClanTagFromName(name) {
+  return name && name.length && clanTags[name] || clanTags.default;
+}
 
 var verbs = [
   {
@@ -27,10 +34,53 @@ var verbs = [
     help: 'Explain the current war strategy'
   },
   {
+    words: ['hero rank', 'hero', 'heroes'],
+    handler: function (req, res) {
+      var clan = req.words.rest().toLowerCase();
+      var tag = getClanTagFromName(clan);
+      Promise.all(_.chain(clanTags).mapObject(function (tag) {
+        return coc
+          .clanMembersByTag(tag)
+          .then(function (r) {
+            return r.items;
+          });
+      }).values().value())
+        .then(function (responses) {
+          return _.union.apply(_, responses);
+        })
+        .then(function (responses) {
+          return Promise.map(_.pluck(responses, 'tag'), function (playerTag) {
+            return coc
+              .playerByTag(playerTag);
+          }, { concurrency: 2 });
+        })
+        .then(function (players) {
+          var response = _.chain(players)
+            .sortBy(['townHallLevel', 'name'])
+            .map(function (player) {
+              var line =  player.name + ' (TH' + player.townHallLevel + ') ';
+              player.heroes.forEach(function (h) {
+                line += h.name + '(' + h.level + ') ';
+              });
+              line += 'total: ' + _.reduce(_.pluck(player.heroes, 'level'), function (sum, val) {
+                return sum += val;
+              }, 0);
+              return line;
+            })
+            .join('\n')
+            .value();
+          res.send(response);
+        });
+    }
+  },
+  {
     words: ['rank'],
     handler: function (req, res) {
+      var clan = req.words.rest().toLowerCase();
+      var tag = getClanTagFromName(clan);
+
       coc
-        .clanMembersByTag(clanTag)
+        .clanMembersByTag(tag)
         .then(function (response) {
           var response = _.chain(response.items)
             .sortBy('clanRank')
@@ -48,19 +98,36 @@ var verbs = [
     words: ['info', 'get info'],
     handler: function (req, res) {
       var name = req.words.rest();
-      coc
-        .clanMembersByTag(clanTag)
-        .then(function (response) {
-          var members = _.filter(response.items, function (member) {
+      Promise.all(_.chain(clanTags).mapObject(function (tag) {
+        return coc
+          .clanMembersByTag(tag)
+          .then(function (r) {
+            return r.items;
+          });
+      }).values().value())
+        .then(function (responses) {
+          var flattened = _.union.apply(_, responses);
+          var members = flattened.filter(function (member) {
             return member.name.toLowerCase() === name.toLowerCase();
           });
-          var member = members[0];
-          if (member) {
+          if (members.length) {
+            var member = members[0];
             res.send(name + ' has ' + member.trophies + ' trophies and ' + member.donations + ' donations');
+          } else {
+            var fuzzyMembers = fuzzy.filter(name, _.pluck(flattened, 'name')).map(function(el) { return el.string; });
+            if (fuzzyMembers.length > 1) {
+              res.send('Did you mean ' + fuzzyMembers.join(' or ') + '?');
+            } else if (fuzzyMembers.length === 1) {
+              var member = flattened.filter(function (member) {
+                return member.name.toLowerCase() === fuzzyMembers[0].toLowerCase();
+              })[0];
+              res.send(member.name + ' has ' + member.trophies + ' trophies and ' + member.donations + ' donations');
+            }
           }
         })
         .catch(function (err) {
-          console.log(err);
+          debug('Error getting play name', name);
+          debug(err);
         });
     },
     args: 'player name',
